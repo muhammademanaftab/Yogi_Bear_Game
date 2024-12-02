@@ -1,13 +1,8 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package model;
 
 public class Game {
-
-    private GameLevel currentLevel;
-    public int lives;
+    private GameUtils currentLevel;
+    private int lives;
     private int score;
 
     public Game() {
@@ -15,7 +10,7 @@ public class Game {
         score = 0;
     }
 
-    public void loadGame(GameLevel level) {
+    public void loadGame(GameUtils level) {
         currentLevel = level;
     }
 
@@ -24,7 +19,7 @@ public class Game {
             return false;
         }
 
-        Position newPos = currentLevel.yogi.translate(d);
+        Position newPos = currentLevel.getYogi().move(d);
 
         if (!currentLevel.isValidPosition(newPos)) {
             return false;
@@ -34,12 +29,12 @@ public class Game {
             return false;
         }
 
-        currentLevel.yogi = newPos;
+        currentLevel.getYogi().setPosition(newPos);
 
         if (currentLevel.isNearRanger(newPos)) {
             loseLife();
             if (lives > 0) {
-                currentLevel.yogi = findEntrance();
+                currentLevel.getYogi().setPosition(findEntrance());
             } else {
                 return false;
             }
@@ -47,34 +42,23 @@ public class Game {
 
         if (currentLevel.collectBasket(newPos)) {
             score++;
-
             if (currentLevel.allBasketsCollected()) {
-                
                 return true;
             }
         }
 
         return true;
     }
-    
-    public boolean isLastLevel() {
-    return currentLevel.gameID.level == GameUtils.getTotalLevels();
-}
-
 
     private Position findEntrance() {
-        for (int y = 0; y < currentLevel.rows; y++) {
-            for (int x = 0; x < currentLevel.cols; x++) {
-                if (currentLevel.level[y][x] == LevelItem.ENTRANCE) {
+        for (int y = 0; y < currentLevel.getRows(); y++) {
+            for (int x = 0; x < currentLevel.getCols(); x++) {
+                if (currentLevel.getLevel()[y][x] == LevelItem.ENTRANCE) {
                     return new Position(x, y);
                 }
             }
         }
-
-        // If no entrance is found, end the game gracefully
-        System.out.println("No entrance found in the level! Ending game.");
-        System.exit(1); // Exit the game with an error code
-        return null; // Will never be reached, added for syntax completeness
+        throw new IllegalStateException("No entrance found in the level!");
     }
 
     public void loseLife() {

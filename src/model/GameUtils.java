@@ -1,12 +1,138 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package model;
 
 import java.util.ArrayList;
 
 public class GameUtils {
+    private final GameID gameID;
+    private final int rows, cols;
+    private final LevelItem[][] level;
+    private Yogi yogi;
+    private int numBaskets;
+    private int basketsCollected;
+
+    public GameUtils(ArrayList<String> gameLevelRows, GameID gameID) {
+        this.gameID = gameID;
+        rows = gameLevelRows.size();
+        cols = gameLevelRows.stream().mapToInt(String::length).max().orElse(0);
+
+        level = new LevelItem[rows][cols];
+        numBaskets = 0;
+        basketsCollected = 0;
+
+        for (int i = 0; i < rows; i++) {
+            String row = gameLevelRows.get(i);
+            for (int j = 0; j < cols; j++) {
+                char c = j < row.length() ? row.charAt(j) : ' ';
+                switch (c) {
+                    case 'Y':
+                        yogi = new Yogi(new Position(j, i));
+                        level[i][j] = LevelItem.EMPTY;
+                        break;
+                    case 'B':
+                        numBaskets++;
+                        level[i][j] = LevelItem.BASKET;
+                        break;
+                    case 'T':
+                        level[i][j] = LevelItem.TREE;
+                        break;
+                    case 'M':
+                        level[i][j] = LevelItem.MOUNTAIN;
+                        break;
+                    case 'E':
+                        level[i][j] = LevelItem.ENTRANCE;
+                        if (yogi == null) {
+                            yogi = new Yogi(new Position(j, i));
+                        }
+                        break;
+                    case 'R':
+                        level[i][j] = LevelItem.RANGER;
+                        break;
+                    default:
+                        level[i][j] = LevelItem.EMPTY;
+                        break;
+                }
+            }
+        }
+
+        if (yogi == null) {
+            throw new IllegalStateException("No starting position for Yogi ('Y' or 'E') found in the level!");
+        }
+    }
+
+    public void printLevel() {
+        System.out.println("\nCurrent Level:");
+        Position yogiPosition = yogi.getPosition();
+
+        for (int y = 0; y < rows; y++) {
+            for (int x = 0; x < cols; x++) {
+                if (yogiPosition.x == x && yogiPosition.y == y) {
+                    System.out.print("Y ");
+                } else {
+                    System.out.print(level[y][x].representation + " ");
+                }
+            }
+            System.out.println();
+        }
+    }
+
+    public Yogi getYogi() {
+        return yogi;
+    }
+
+    public void setYogi(Yogi yogi) {
+        this.yogi = yogi;
+    }
+
+    public int getRows() {
+        return rows;
+    }
+
+    public int getCols() {
+        return cols;
+    }
+
+    public LevelItem[][] getLevel() {
+        return level;
+    }
+
+    public GameID getGameID() {
+        return gameID;
+    }
+
+    public boolean isValidPosition(Position p) {
+        return p.x >= 0 && p.y >= 0 && p.x < cols && p.y < rows;
+    }
+
+    public boolean isObstacle(Position p) {
+        if (!isValidPosition(p)) {
+            return true;
+        }
+        LevelItem li = level[p.y][p.x];
+        return li == LevelItem.TREE || li == LevelItem.MOUNTAIN;
+    }
+
+    public boolean collectBasket(Position p) {
+        if (isValidPosition(p) && level[p.y][p.x] == LevelItem.BASKET) {
+            level[p.y][p.x] = LevelItem.EMPTY;
+            basketsCollected++;
+            return true;
+        }
+        return false;
+    }
+
+    public boolean allBasketsCollected() {
+        return basketsCollected == numBaskets;
+    }
+
+    public boolean isNearRanger(Position p) {
+        for (Direction d : Direction.values()) {
+            Position neighbor = p.translate(d);
+            if (isValidPosition(neighbor) && level[neighbor.y][neighbor.x] == LevelItem.RANGER) {
+                return true;
+            }
+        }
+        return false;
+    }
 
     public static ArrayList<String> getLevel(int levelNumber) {
         ArrayList<String> levelRows = new ArrayList<>();
@@ -28,24 +154,7 @@ public class GameUtils {
         return levelRows;
     }
 
-    public static void printLevel(GameLevel level) {
-        System.out.println("\nCurrent Level:");
-        Position yogi = level.yogi;
-
-        for (int y = 0; y < level.rows; y++) {
-            for (int x = 0; x < level.cols; x++) {
-                if (yogi.x == x && yogi.y == y) {
-                    System.out.print("Y "); // Yogi's position
-                } else {
-                    System.out.print(level.level[y][x].representation + " ");
-                }
-            }
-            System.out.println();
-        }
-    }
-    
     public static int getTotalLevels() {
-    return 2;
-}
-
+        return 2;
+    }
 }

@@ -8,15 +8,15 @@ public class Main {
 
     public static void main(String[] args) {
         GameID gameID = new GameID("EASY", 1);
-        GameLevel gameLevel = new GameLevel(GameUtils.getLevel(1), gameID);
+        GameUtils gameUtils = new GameUtils(GameUtils.getLevel(1), gameID);
         Game game = new Game();
-        game.loadGame(gameLevel);
+        game.loadGame(gameUtils);
 
         Scanner scanner = new Scanner(System.in);
 
         System.out.println("Welcome to the Yogi Bear game!");
         System.out.println("Controls: W (up), A (left), S (down), D (right), Q (quit)");
-        GameUtils.printLevel(gameLevel);
+        gameUtils.printLevel();
 
         while (true) {
             System.out.print("Enter your move: ");
@@ -46,23 +46,24 @@ public class Main {
 
             if (!game.moveYogi(direction)) {
                 System.out.println("Invalid move or obstacle!");
-                if (game.lives <= 0) {
+                if (game.getLives() <= 0) {
                     System.out.println("Game Over! You ran out of lives.");
                     break;
                 }
             }
 
-            GameUtils.printLevel(gameLevel);
+            gameUtils.printLevel();
 
-            if (gameLevel.allBasketsCollected()) {
+            if (gameUtils.allBasketsCollected()) {
                 System.out.println("Congratulations! You collected all the baskets!");
-                if (GameUtils.getTotalLevels() == gameLevel.gameID.level) {
+                if (GameUtils.getTotalLevels() == gameUtils.getGameID().level) {
                     System.out.println("You completed all levels! Final Score: " + game.getScore());
                     break;
                 } else {
-                    gameLevel = new GameLevel(GameUtils.getLevel(gameLevel.gameID.level + 1), new GameID("EASY", gameLevel.gameID.level + 1));
-                    game.loadGame(gameLevel);
-                    GameUtils.printLevel(gameLevel);
+                    gameUtils = new GameUtils(GameUtils.getLevel(gameUtils.getGameID().level + 1),
+                            new GameID("EASY", gameUtils.getGameID().level + 1));
+                    game.loadGame(gameUtils);
+                    gameUtils.printLevel();
                 }
             }
         }
