@@ -65,40 +65,37 @@ public class GameUtils {
         }
     }
 
-    public void moveRangersRandomly() {
-        Position yogiPosition = yogi.getPosition();
-        Position entrance = getEntrance();
+   public boolean moveRangersRandomly() {
+    Position yogiPosition = yogi.getPosition();
+    Position entrance = getEntrance();
+    boolean yogiCaught = false;
 
-        for (Ranger ranger : rangers) {
-            Position currentPosition = ranger.getPosition();
-            List<Direction> possibleDirections = new ArrayList<>();
+    for (Ranger ranger : rangers) {
+        Position currentPosition = ranger.getPosition();
+        List<Direction> possibleDirections = new ArrayList<>();
 
-            // Check all valid directions for the ranger
-            for (Direction d : Direction.values()) {
-                Position newPosition = currentPosition.translate(d);
-                if (isValidPosition(newPosition) &&
-                        isMovableForRanger(newPosition) &&
-                        (!newPosition.equals(yogiPosition) || yogiPosition.equals(entrance))) {
-                    // Ranger can move to Yogi's position only if it's not the entrance
-                    possibleDirections.add(d);
-                }
+        // Check all valid directions for the ranger
+        for (Direction d : Direction.values()) {
+            Position newPosition = currentPosition.translate(d);
+            if (isValidPosition(newPosition) && isMovableForRanger(newPosition)) {
+                possibleDirections.add(d);
             }
+        }
 
-            // Move to a random valid direction if available
-            if (!possibleDirections.isEmpty()) {
-                Direction randomDirection = possibleDirections.get(random.nextInt(possibleDirections.size()));
-                Position newPosition = currentPosition.translate(randomDirection);
-                ranger.setPosition(newPosition);
+        // Move to a random valid direction if available
+        if (!possibleDirections.isEmpty()) {
+            Direction randomDirection = possibleDirections.get(random.nextInt(possibleDirections.size()));
+            Position newPosition = currentPosition.translate(randomDirection);
+            ranger.setPosition(newPosition);
 
-                // Check if the ranger moved to Yogi's position
-                if (newPosition.equals(yogiPosition) && !yogiPosition.equals(entrance)) {
-                    // Trigger Yogi's death logic
-                    System.out.println("Yogi has been caught by a ranger!");
-                    throw new IllegalStateException("Yogi has been caught!");
-                }
+            // Check if the ranger moved to Yogi's position
+            if (newPosition.equals(yogiPosition) && !yogiPosition.equals(entrance)) {
+                yogiCaught = true;
             }
         }
     }
+    return yogiCaught; // Return true if Yogi is caught by a ranger
+}
 
     private boolean isMovableForRanger(Position p) {
         if (!isValidPosition(p)) {
@@ -116,6 +113,19 @@ public class GameUtils {
             }
         }
         return true;
+    }
+
+    public boolean handleYogiMove(Position newPosition) {
+        Position entrance = getEntrance();
+
+        // If Yogi moves into a ranger's position
+        for (Ranger ranger : rangers) {
+            if (ranger.getPosition().equals(newPosition) && !newPosition.equals(entrance)) {
+                System.out.println("Yogi moved to a Ranger's position! Yogi dies!");
+                return true; // Indicates Yogi has died
+            }
+        }
+        return false; // Indicates Yogi is safe
     }
 
     public Yogi getYogi() {
@@ -171,14 +181,14 @@ public class GameUtils {
         return basketsCollected == numBaskets;
     }
 
-    public boolean isNearRanger(Position p) {
-        for (Ranger ranger : rangers) {
-            if (ranger.isNear(p)) {
-                return true;
-            }
-        }
-        return false;
-    }
+//    public boolean isNearRanger(Position p) {
+//        for (Ranger ranger : rangers) {
+//            if (ranger.isNear(p)) {
+//                return true;
+//            }
+//        }
+//        return false;
+//    }
 
     public Position getEntrance() {
         for (int y = 0; y < rows; y++) {

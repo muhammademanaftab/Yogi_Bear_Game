@@ -29,64 +29,64 @@ public class MainWindow extends JFrame {
     private final JLabel gameStatusLabel;
     private Timer rangerMovementTimer;
     private boolean isRespawning = false;
+    private boolean isLevelActive = true; // Track if the level is active
 
     public MainWindow() throws IOException {
-        game = new Game();
+    game = new Game();
 
-        setTitle("Yogi Bear Game");
-        setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+    setTitle("Yogi Bear Game");
+    setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 
-        // Menu bar setup
-        JMenuBar menuBar = new JMenuBar();
-        JMenu menuGame = new JMenu("Game");
-        JMenu menuGameScale = new JMenu("Scale");
-        createLevelMenu(menuGame);
-        createScaleMenu(menuGameScale, 1.0, 2.0, 0.5);
+    // Menu bar setup
+    JMenuBar menuBar = new JMenuBar();
+    JMenu menuGame = new JMenu("Game");
+    JMenu menuGameScale = new JMenu("Scale");
+    createLevelMenu(menuGame);
+    createScaleMenu(menuGameScale, 1.0, 2.0, 0.5);
 
-        JMenuItem exitItem = new JMenuItem(new AbstractAction("Exit") {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                System.exit(0);
+    JMenuItem exitItem = new JMenuItem(new AbstractAction("Exit") {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            System.exit(0);
+        }
+    });
+    menuGame.add(exitItem);
+    menuBar.add(menuGame);
+    menuBar.add(menuGameScale);
+    setJMenuBar(menuBar);
+
+    // Layout setup
+    setLayout(new BorderLayout(0, 10));
+    gameStatusLabel = new JLabel("Welcome to Yogi Bear Game!");
+    add(gameStatusLabel, BorderLayout.NORTH);
+
+    board = new Board(game);
+    add(board, BorderLayout.CENTER);
+
+    // Timer for ranger movement (initialize here)
+    rangerMovementTimer = new Timer(500, new AbstractAction() { // Adjust delay as needed
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            if (!isRespawning && isLevelActive) { // Only move rangers if level is active
+                handleRangerMovement();
             }
-        });
-        menuGame.add(exitItem);
-        menuBar.add(menuGame);
-        menuBar.add(menuGameScale);
-        setJMenuBar(menuBar);
+        }
+    });
 
-        // Layout setup
-        setLayout(new BorderLayout(0, 10));
-        gameStatusLabel = new JLabel("Welcome to Yogi Bear Game!");
-        add(gameStatusLabel, BorderLayout.NORTH);
+    // Load the first level
+    loadLevel(1);
 
-        board = new Board(game);
-        add(board, BorderLayout.CENTER);
+    // Key listener for Yogi's movement
+    addKeyListener(new KeyAdapter() {
+        @Override
+        public void keyPressed(KeyEvent e) {
+            handleKeyPress(e);
+        }
+    });
 
-        // Load the first level
-        loadLevel(1);
-
-        // Key listener for Yogi's movement
-        addKeyListener(new KeyAdapter() {
-            @Override
-            public void keyPressed(KeyEvent e) {
-                handleKeyPress(e);
-            }
-        });
-
-        // Timer for ranger movement
-        rangerMovementTimer = new Timer(1000, new AbstractAction() { // Adjust delay as needed
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                if (!isRespawning) {
-                    handleRangerMovement();
-                }
-            }
-        });
-        rangerMovementTimer.start();
-
-        setLocationRelativeTo(null);
-        setVisible(true);
-    }
+    setLocationRelativeTo(null);
+    setVisible(true);
+}
 
     private void createLevelMenu(JMenu menu) {
         for (int i = 1; i <= Levels.getTotalLevels(); i++) {
@@ -125,6 +125,9 @@ public class MainWindow extends JFrame {
             board.refresh();
             updateStatusLabel();
             pack(); // Adjust window size for new level dimensions
+
+            isLevelActive = true; // Mark the level as active
+            rangerMovementTimer.start(); // Restart ranger movement
             JOptionPane.showMessageDialog(this, "Welcome to Level " + levelNumber, "Level Start", JOptionPane.INFORMATION_MESSAGE);
         } catch (Exception ex) {
             JOptionPane.showMessageDialog(this, "Error loading level: " + ex.getMessage(),
@@ -133,7 +136,7 @@ public class MainWindow extends JFrame {
     }
 
     private void handleKeyPress(KeyEvent e) {
-        if (isRespawning) return;
+        if (isRespawning || !isLevelActive) return; // Ignore input during respawn or when level is inactive
 
         Direction direction = null;
         switch (e.getKeyCode()) {
@@ -152,7 +155,8 @@ public class MainWindow extends JFrame {
         }
 
         if (direction != null && game.moveYogi(direction)) {
-            handlePostMoveLogic();
+            handleYogiAndRangerCollision(); // Check collision after Yogi moves
+            handlePostMoveLogic();         // Check game state after Yogi's move
         }
 
         board.refresh();
@@ -160,19 +164,22 @@ public class MainWindow extends JFrame {
     }
 
     private void handleRangerMovement() {
-        game.getCurrentLevel().moveRangersRandomly();
+        game.getCurrentLevel().moveRangersRandomly(); // Rangers move randomly
+        handleYogiAndRangerCollision(); // Check collision after ranger moves
         board.refresh();
+    }
 
+    private void handleYogiAndRangerCollision() {
         Position yogiPosition = game.getCurrentLevel().getYogi().getPosition();
         Position entrancePosition = game.getCurrentLevel().getEntrance();
 
-        // Ensure Yogi does not lose a life at the entrance
-        if (!yogiPosition.equals(entrancePosition)) { // Ignore if Yogi is at the entrance
-            for (var ranger : game.getCurrentLevel().getRangers()) {
-                if (ranger.getPosition().equals(yogiPosition)) {
-                    handleYogiLifeLoss();
-                    return;
-                }
+        // Ignore collision if Yogi is at the entrance
+        if (yogiPosition.equals(entrancePosition)) return;
+
+        for (var ranger : game.getCurrentLevel().getRangers()) {
+            if (ranger.getPosition().equals(yogiPosition)) {
+                handleYogiLifeLoss();
+                return;
             }
         }
     }
@@ -194,24 +201,18 @@ public class MainWindow extends JFrame {
 
     private void handlePostMoveLogic() {
         if (game.getCurrentLevel().allBasketsCollected()) {
-            JOptionPane.showMessageDialog(this, "Level Completed! Loading next level...", "Level Complete", JOptionPane.INFORMATION_MESSAGE);
+            isLevelActive = false; // Mark the level as inactive
+            rangerMovementTimer.stop(); // Stop ranger movement
+            JOptionPane.showMessageDialog(this, "Level Completed! Press OK to load the next level.", "Level Complete", JOptionPane.INFORMATION_MESSAGE);
             loadNextLevel();
+            return;
         }
 
         if (game.isVictory()) {
+            isLevelActive = false; // Mark the game as inactive
+            rangerMovementTimer.stop(); // Stop ranger movement
             JOptionPane.showMessageDialog(this, "Congratulations! You won the game!", "Victory", JOptionPane.INFORMATION_MESSAGE);
             System.exit(0);
-        }
-
-        Position yogiPosition = game.getCurrentLevel().getYogi().getPosition();
-        Position entrancePosition = game.getCurrentLevel().getEntrance();
-        if (!yogiPosition.equals(entrancePosition)) {
-            for (var ranger : game.getCurrentLevel().getRangers()) {
-                if (ranger.getPosition().equals(yogiPosition)) {
-                    handleYogiLifeLoss();
-                    return;
-                }
-            }
         }
     }
 
