@@ -18,7 +18,7 @@ public class Ranger {
     public boolean isNear(Position yogiPosition) {
         for (Direction direction : Direction.values()) {
             Position neighbor = yogiPosition.translate(direction);
-            if (neighbor.equals(this.position)) {
+            if (neighbor.x == position.x && neighbor.y == position.y) {
                 return true;
             }
         }
