@@ -9,7 +9,7 @@ public class GameUtils {
     private final int rows, cols;
     private final LevelItem[][] level;
     private Yogi yogi;
-    private Ranger ranger;
+    private final List<Ranger> rangers = new ArrayList<>();
     private int numBaskets;
     private int basketsCollected;
     private final Random random = new Random();
@@ -49,7 +49,7 @@ public class GameUtils {
                         }
                         break;
                     case 'R':
-                        ranger = new Ranger(new Position(j, i));
+                        rangers.add(new Ranger(new Position(j, i)));
                         level[i][j] = LevelItem.EMPTY;
                         break;
                     default:
@@ -62,22 +62,28 @@ public class GameUtils {
         if (yogi == null) {
             throw new IllegalStateException("No starting position for Yogi ('Y' or 'E') found in the level!");
         }
-        if (ranger == null) {
-            throw new IllegalStateException("No ranger ('R') found in the level!");
-        }
     }
 
     public void printLevel() {
         System.out.println("\nCurrent Level:");
         Position yogiPosition = yogi.getPosition();
-        Position rangerPosition = ranger.getPosition();
 
         for (int y = 0; y < rows; y++) {
             for (int x = 0; x < cols; x++) {
+                boolean rangerPrinted = false;
+                for (Ranger ranger : rangers) {
+                    if (ranger.getPosition().x == x && ranger.getPosition().y == y) {
+                        System.out.print("R ");
+                        rangerPrinted = true;
+                        break;
+                    }
+                }
+                if (rangerPrinted) {
+                    continue;
+                }
+
                 if (yogiPosition.x == x && yogiPosition.y == y) {
                     System.out.print("Y ");
-                } else if (rangerPosition.x == x && rangerPosition.y == y) {
-                    System.out.print("R ");
                 } else {
                     System.out.print(level[y][x].representation + " ");
                 }
@@ -86,22 +92,24 @@ public class GameUtils {
         }
     }
 
-    public void moveRangerRandomly() {
-        Position currentPosition = ranger.getPosition();
-        List<Direction> possibleDirections = new ArrayList<>();
+    public void moveRangersRandomly() {
+        for (Ranger ranger : rangers) {
+            Position currentPosition = ranger.getPosition();
+            List<Direction> possibleDirections = new ArrayList<>();
 
-        // Check all valid directions for the ranger
-        for (Direction d : Direction.values()) {
-            Position newPosition = currentPosition.translate(d);
-            if (isValidPosition(newPosition) && !isObstacle(newPosition) && level[newPosition.y][newPosition.x] != LevelItem.BASKET) {
-                possibleDirections.add(d);
+            // Check all valid directions for the ranger
+            for (Direction d : Direction.values()) {
+                Position newPosition = currentPosition.translate(d);
+                if (isValidPosition(newPosition) && !isObstacle(newPosition) && level[newPosition.y][newPosition.x] != LevelItem.BASKET) {
+                    possibleDirections.add(d);
+                }
             }
-        }
 
-        // Move to a random valid direction if available
-        if (!possibleDirections.isEmpty()) {
-            Direction randomDirection = possibleDirections.get(random.nextInt(possibleDirections.size()));
-            ranger.setPosition(currentPosition.translate(randomDirection));
+            // Move to a random valid direction if available
+            if (!possibleDirections.isEmpty()) {
+                Direction randomDirection = possibleDirections.get(random.nextInt(possibleDirections.size()));
+                ranger.setPosition(currentPosition.translate(randomDirection));
+            }
         }
     }
 
@@ -113,12 +121,8 @@ public class GameUtils {
         this.yogi = yogi;
     }
 
-    public Ranger getRanger() {
-        return ranger;
-    }
-
-    public void setRanger(Ranger ranger) {
-        this.ranger = ranger;
+    public List<Ranger> getRangers() {
+        return rangers;
     }
 
     public int getRows() {
@@ -163,30 +167,11 @@ public class GameUtils {
     }
 
     public boolean isNearRanger(Position p) {
-        return ranger.isNear(p);
-    }
-
-    public static ArrayList<String> getLevel(int levelNumber) {
-        ArrayList<String> levelRows = new ArrayList<>();
-        switch (levelNumber) {
-            case 1:
-                levelRows.add("E       B ");
-                levelRows.add("  T T T   ");
-                levelRows.add("    M     ");
-                levelRows.add("B       R ");
-                break;
-            case 2:
-                levelRows.add("E TTT ");
-                levelRows.add("  M  ");
-                levelRows.add("B   R");
-                break;
-            default:
-                throw new IllegalArgumentException("Level " + levelNumber + " is not defined.");
+        for (Ranger ranger : rangers) {
+            if (ranger.isNear(p)) {
+                return true;
+            }
         }
-        return levelRows;
-    }
-
-    public static int getTotalLevels() {
-        return 2;
+        return false;
     }
 }
