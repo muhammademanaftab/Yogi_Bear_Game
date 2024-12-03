@@ -1,6 +1,7 @@
 package model;
 
 public class Game {
+
     private GameUtils currentLevel;
     private int lives;
     private int score;
@@ -31,14 +32,14 @@ public class Game {
 
         currentLevel.getYogi().setPosition(newPos);
 
-        if (currentLevel.isNearRanger(newPos)) {
-            loseLife();
-            if (lives > 0) {
-                currentLevel.getYogi().setPosition(findEntrance());
-            } else {
-                return false;
-            }
-        }
+//        if (!newPos.equals(currentLevel.getEntrance()) && currentLevel.isNearRanger(newPos)) {
+//            loseLife();
+//            if (lives > 0) {
+//                currentLevel.getYogi().setPosition(currentLevel.getEntrance());
+//            } else {
+//                return false;
+//            }
+//        }
 
         if (currentLevel.collectBasket(newPos)) {
             score++;
@@ -63,10 +64,28 @@ public class Game {
 
     public void loseLife() {
         lives--;
-        if (lives > 0) {
-            System.out.println("Respawning Yogi at the entrance.");
-        } else {
+        if (lives <= 0) {
             System.out.println("Game Over!");
+        } else {
+            System.out.println("Respawning Yogi at the entrance.");
+        }
+    }
+
+    public boolean isGameOver() {
+        return lives <= 0;
+    }
+
+    public boolean isVictory() {
+        return currentLevel != null && currentLevel.allBasketsCollected() && currentLevel.getGameID().level == Levels.getTotalLevels();
+    }
+
+    public void completeLevel() {
+        if (currentLevel != null && currentLevel.allBasketsCollected()) {
+            int nextLevel = currentLevel.getGameID().level + 1;
+            if (nextLevel > Levels.getTotalLevels()) {
+                return; // No more levels, victory condition
+            }
+            currentLevel = new GameUtils(Levels.getLevel(nextLevel), new GameID("EASY", nextLevel));
         }
     }
 
@@ -76,5 +95,9 @@ public class Game {
 
     public int getScore() {
         return score;
+    }
+
+    public GameUtils getCurrentLevel() {
+        return currentLevel;
     }
 }

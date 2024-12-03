@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Random;
 
 public class GameUtils {
+
     private final GameID gameID;
     private final int rows, cols;
     private final LevelItem[][] level;
@@ -64,35 +65,10 @@ public class GameUtils {
         }
     }
 
-    public void printLevel() {
-        System.out.println("\nCurrent Level:");
-        Position yogiPosition = yogi.getPosition();
-
-        for (int y = 0; y < rows; y++) {
-            for (int x = 0; x < cols; x++) {
-                boolean rangerPrinted = false;
-                for (Ranger ranger : rangers) {
-                    if (ranger.getPosition().x == x && ranger.getPosition().y == y) {
-                        System.out.print("R ");
-                        rangerPrinted = true;
-                        break;
-                    }
-                }
-                if (rangerPrinted) {
-                    continue;
-                }
-
-                if (yogiPosition.x == x && yogiPosition.y == y) {
-                    System.out.print("Y ");
-                } else {
-                    System.out.print(level[y][x].representation + " ");
-                }
-            }
-            System.out.println();
-        }
-    }
-
     public void moveRangersRandomly() {
+        Position yogiPosition = yogi.getPosition();
+        Position entrance = getEntrance();
+
         for (Ranger ranger : rangers) {
             Position currentPosition = ranger.getPosition();
             List<Direction> possibleDirections = new ArrayList<>();
@@ -100,7 +76,10 @@ public class GameUtils {
             // Check all valid directions for the ranger
             for (Direction d : Direction.values()) {
                 Position newPosition = currentPosition.translate(d);
-                if (isValidPosition(newPosition) && !isObstacle(newPosition) && level[newPosition.y][newPosition.x] != LevelItem.BASKET) {
+                if (isValidPosition(newPosition) &&
+                        isMovableForRanger(newPosition) &&
+                        (!newPosition.equals(yogiPosition) || yogiPosition.equals(entrance))) {
+                    // Ranger can move to Yogi's position only if it's not the entrance
                     possibleDirections.add(d);
                 }
             }
@@ -108,9 +87,35 @@ public class GameUtils {
             // Move to a random valid direction if available
             if (!possibleDirections.isEmpty()) {
                 Direction randomDirection = possibleDirections.get(random.nextInt(possibleDirections.size()));
-                ranger.setPosition(currentPosition.translate(randomDirection));
+                Position newPosition = currentPosition.translate(randomDirection);
+                ranger.setPosition(newPosition);
+
+                // Check if the ranger moved to Yogi's position
+                if (newPosition.equals(yogiPosition) && !yogiPosition.equals(entrance)) {
+                    // Trigger Yogi's death logic
+                    System.out.println("Yogi has been caught by a ranger!");
+                    throw new IllegalStateException("Yogi has been caught!");
+                }
             }
         }
+    }
+
+    private boolean isMovableForRanger(Position p) {
+        if (!isValidPosition(p)) {
+            return false;
+        }
+        LevelItem li = level[p.y][p.x];
+
+        // Ensure Rangers cannot move to trees, mountains, baskets, entrances, or positions with other Rangers
+        if (li != LevelItem.EMPTY) {
+            return false;
+        }
+        for (Ranger ranger : rangers) {
+            if (ranger.getPosition().equals(p)) {
+                return false; // Another Ranger is already at this position
+            }
+        }
+        return true;
     }
 
     public Yogi getYogi() {
@@ -173,5 +178,16 @@ public class GameUtils {
             }
         }
         return false;
+    }
+
+    public Position getEntrance() {
+        for (int y = 0; y < rows; y++) {
+            for (int x = 0; x < cols; x++) {
+                if (level[y][x] == LevelItem.ENTRANCE) {
+                    return new Position(x, y);
+                }
+            }
+        }
+        throw new IllegalStateException("No entrance found in the level!");
     }
 }

@@ -6,39 +6,64 @@ public class Levels {
     public static ArrayList<String> getLevel(int levelNumber) {
         ArrayList<String> levelRows = new ArrayList<>();
         switch (levelNumber) {
-            case 1:
-                levelRows.add("E       B ");
-                levelRows.add("  T T T   ");
-                levelRows.add("    M     ");
-                levelRows.add("B       R ");
+            case 1: // Easy level: 5x5
+                levelRows.add("E    ");
+                levelRows.add("  T  ");
+                levelRows.add("     ");
+                levelRows.add("  B  ");
+                levelRows.add("    R");
                 break;
 
-            case 2:
-                levelRows.add("E   R   B ");
-                levelRows.add("  T T T R ");
-                levelRows.add("R   M     ");
-                levelRows.add("B R       ");
+            case 2: // Slightly harder: 7x7
+                levelRows.add("E     B");
+                levelRows.add("   T T ");
+                levelRows.add("       ");
+                levelRows.add("   R   ");
+                levelRows.add("     T ");
+                levelRows.add("       ");
+                levelRows.add("    R  ");
                 break;
 
-            case 3:
-                levelRows.add("E   T T   ");
-                levelRows.add("R     B   ");
-                levelRows.add("  M M     ");
-                levelRows.add("  B   R R ");
+            case 3: // Medium difficulty: 9x9
+                levelRows.add("E        ");
+                levelRows.add("   T     ");
+                levelRows.add("     M   ");
+                levelRows.add("    B    ");
+                levelRows.add(" R       ");
+                levelRows.add("       R ");
+                levelRows.add("   M     ");
+                levelRows.add("     T   ");
+                levelRows.add("        B");
                 break;
 
-            case 4:
-                levelRows.add("E R   T T ");
-                levelRows.add("  T   B   ");
-                levelRows.add("B   M M R ");
-                levelRows.add("    R     ");
+            case 4: // Harder: 11x11
+                levelRows.add("E          ");
+                levelRows.add("  T T       ");
+                levelRows.add("      M     ");
+                levelRows.add(" R          ");
+                levelRows.add("     B      ");
+                levelRows.add("         R  ");
+                levelRows.add("     M      ");
+                levelRows.add("        T   ");
+                levelRows.add("    R       ");
+                levelRows.add("       B    ");
+                levelRows.add("  R         ");
                 break;
 
-            case 5:
-                levelRows.add("E       B ");
-                levelRows.add("R M T T T ");
-                levelRows.add("B   M   R ");
-                levelRows.add("    R   B ");
+            case 5: // Hardest: 13x13
+                levelRows.add("E           ");
+                levelRows.add("  T   T      ");
+                levelRows.add("    M        ");
+                levelRows.add("  B      R   ");
+                levelRows.add("             ");
+                levelRows.add("      R   T  ");
+                levelRows.add("             ");
+                levelRows.add("    M        ");
+                levelRows.add("  T          ");
+                levelRows.add("       B     ");
+                levelRows.add("             ");
+                levelRows.add("    R        ");
+                levelRows.add("         B   ");
                 break;
 
             default:
@@ -48,6 +73,6 @@ public class Levels {
     }
 
     public static int getTotalLevels() {
-        return 5; // Adjusted to reflect the total number of levels.
+        return 5; // Reflects the total number of levels.
     }
 }
