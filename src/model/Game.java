@@ -7,8 +7,7 @@ public class Game {
     private int score;
 
     public Game() {
-        lives = 3;
-        score = 0;
+        resetGame(); // Initialize lives and score
     }
 
     public void loadGame(GameUtils level) {
@@ -31,15 +30,6 @@ public class Game {
         }
 
         currentLevel.getYogi().setPosition(newPos);
-
-//        if (!newPos.equals(currentLevel.getEntrance()) && currentLevel.isNearRanger(newPos)) {
-//            loseLife();
-//            if (lives > 0) {
-//                currentLevel.getYogi().setPosition(currentLevel.getEntrance());
-//            } else {
-//                return false;
-//            }
-//        }
 
         if (currentLevel.collectBasket(newPos)) {
             score++;
@@ -99,5 +89,11 @@ public class Game {
 
     public GameUtils getCurrentLevel() {
         return currentLevel;
+    }
+
+    public void resetGame() {
+        lives = 3; // Reset lives to the initial value
+        score = 0; // Reset score to 0
+        currentLevel = null; // Clear the current level
     }
 }

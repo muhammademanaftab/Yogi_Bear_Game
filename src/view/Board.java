@@ -58,46 +58,53 @@ public class Board extends JPanel {
             for (int x = 0; x < cols; x++) {
                 LevelItem item = game.getCurrentLevel().getLevel()[y][x];
 
-                // Assign colors based on level item
+                // Assign shapes and colors based on level item
                 switch (item) {
                     case BASKET:
                         gr.setColor(Color.YELLOW);
-                        gr.fillRect(x * scaledSize, y * scaledSize, scaledSize, scaledSize);
+                        gr.fillRect(x * scaledSize, y * scaledSize, scaledSize, scaledSize); // Square
                         break;
                     case TREE:
                         gr.setColor(new Color(34, 139, 34)); // Forest green
-                        gr.fillRect(x * scaledSize, y * scaledSize, scaledSize, scaledSize);
+                        drawTriangle(gr, x * scaledSize, y * scaledSize, scaledSize); // Green triangle
                         break;
                     case MOUNTAIN:
                         gr.setColor(Color.GRAY);
-                        gr.fillRect(x * scaledSize, y * scaledSize, scaledSize, scaledSize);
+                        drawTriangle(gr, x * scaledSize, y * scaledSize, scaledSize); // Gray triangle
                         break;
                     case ENTRANCE:
                         gr.setColor(Color.BLUE);
-                        gr.fillRect(x * scaledSize, y * scaledSize, scaledSize, scaledSize);
+                        gr.fillRect(x * scaledSize, y * scaledSize, scaledSize, scaledSize); // Square
                         break;
                     case EMPTY:
                         gr.setColor(Color.WHITE);
-                        gr.fillRect(x * scaledSize, y * scaledSize, scaledSize, scaledSize);
+                        gr.fillRect(x * scaledSize, y * scaledSize, scaledSize, scaledSize); // White background
                         break;
                 }
 
-                // Draw grid lines for better visual clarity
+                // Draw grid border
                 gr.setColor(Color.BLACK);
                 gr.drawRect(x * scaledSize, y * scaledSize, scaledSize, scaledSize);
             }
         }
 
-        // Draw rangers
+        // Draw Rangers
         gr.setColor(Color.RED);
         for (var ranger : game.getCurrentLevel().getRangers()) {
             Position rangerPos = ranger.getPosition();
-            gr.fillOval(rangerPos.x * scaledSize, rangerPos.y * scaledSize, scaledSize, scaledSize);
+            gr.fillOval(rangerPos.x * scaledSize, rangerPos.y * scaledSize, scaledSize, scaledSize); // Circle
         }
 
         // Draw Yogi's position
         Position yogiPosition = game.getCurrentLevel().getYogi().getPosition();
-        gr.setColor(Color.ORANGE);
-        gr.fillOval(yogiPosition.x * scaledSize, yogiPosition.y * scaledSize, scaledSize, scaledSize);
+        gr.setColor(Color.YELLOW);
+        gr.fillOval(yogiPosition.x * scaledSize, yogiPosition.y * scaledSize, scaledSize, scaledSize); // Circle
+    }
+
+    // Draw a triangle (helper method)
+    private void drawTriangle(Graphics2D gr, int x, int y, int size) {
+        int[] xPoints = {x + size / 2, x, x + size};
+        int[] yPoints = {y, y + size, y + size};
+        gr.fillPolygon(xPoints, yPoints, 3);
     }
 }
