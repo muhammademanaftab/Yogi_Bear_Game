@@ -7,7 +7,7 @@ public class Levels {
         ArrayList<String> levelRows = new ArrayList<>();
         switch (levelNumber) {
             case 1: // Small and simple: 6x6
-                levelRows.add("E     ");
+                levelRows.add("E  M  ");
                 levelRows.add("  B   ");
                 levelRows.add("   T  ");
                 levelRows.add("    R ");
