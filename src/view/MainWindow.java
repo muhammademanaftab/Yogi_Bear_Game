@@ -11,7 +11,6 @@ import javax.swing.*;
 import model.Direction;
 import model.Game;
 import model.GameUtils;
-import model.GameID;
 import model.Levels;
 import model.Position;
 
@@ -145,7 +144,7 @@ public class MainWindow extends JFrame {
     private void loadLevel(int levelNumber) {
         try {
             ArrayList<String> levelLayout = Levels.getLevel(levelNumber);
-            GameUtils selectedLevel = new GameUtils(levelLayout, new GameID("EASY", levelNumber));
+            GameUtils selectedLevel = new GameUtils(levelLayout, levelNumber);
             game.loadGame(selectedLevel);
             board.refresh();
             updateStatusLabel();
@@ -257,7 +256,7 @@ public class MainWindow extends JFrame {
      * Loads the next level or displays the victory dialog if all levels are completed.
      */
     private void loadNextLevel() {
-        int currentLevel = game.getCurrentLevel().getGameID().level;
+        int currentLevel = game.getCurrentLevel().getLevelNumber();
         if (currentLevel >= Levels.getTotalLevels()) {
             isLevelActive = false;
             offerToSaveScore("Congratulations! You completed all levels!");

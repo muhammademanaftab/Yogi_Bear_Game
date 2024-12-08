@@ -4,33 +4,23 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-/**
- * Handles game logic for each level, including Yogi and Ranger movements,
- * collecting baskets, and managing obstacles.
- */
 public class GameUtils {
 
-    private final GameID gameID;
+    private final int level;
     private final int rows, cols;
-    private final LevelItem[][] level;
+    private final LevelItem[][] levelItems;
     private Yogi yogi;
     private final List<Ranger> rangers = new ArrayList<>();
     private int numBaskets;
     private int basketsCollected;
     private final Random random = new Random();
 
-    /**
-     * Constructs a new GameUtils instance based on the provided level layout.
-     *
-     * @param gameLevelRows The level layout as a list of strings.
-     * @param gameID        The unique identifier for the level.
-     */
-    public GameUtils(ArrayList<String> gameLevelRows, GameID gameID) {
-        this.gameID = gameID;
+    public GameUtils(ArrayList<String> gameLevelRows, int level) {
+        this.level = level;
         rows = gameLevelRows.size();
         cols = gameLevelRows.stream().mapToInt(String::length).max().orElse(0);
 
-        level = new LevelItem[rows][cols];
+        levelItems = new LevelItem[rows][cols];
         numBaskets = 0;
         basketsCollected = 0;
 
@@ -41,25 +31,25 @@ public class GameUtils {
                 switch (c) {
                     case 'Y' -> {
                         yogi = new Yogi(new Position(j, i));
-                        level[i][j] = LevelItem.EMPTY;
+                        levelItems[i][j] = LevelItem.EMPTY;
                     }
                     case 'B' -> {
                         numBaskets++;
-                        level[i][j] = LevelItem.BASKET;
+                        levelItems[i][j] = LevelItem.BASKET;
                     }
-                    case 'T' -> level[i][j] = LevelItem.TREE;
-                    case 'M' -> level[i][j] = LevelItem.MOUNTAIN;
+                    case 'T' -> levelItems[i][j] = LevelItem.TREE;
+                    case 'M' -> levelItems[i][j] = LevelItem.MOUNTAIN;
                     case 'E' -> {
-                        level[i][j] = LevelItem.ENTRANCE;
+                        levelItems[i][j] = LevelItem.ENTRANCE;
                         if (yogi == null) {
                             yogi = new Yogi(new Position(j, i));
                         }
                     }
                     case 'R' -> {
                         rangers.add(new Ranger(new Position(j, i)));
-                        level[i][j] = LevelItem.EMPTY;
+                        levelItems[i][j] = LevelItem.EMPTY;
                     }
-                    default -> level[i][j] = LevelItem.EMPTY;
+                    default -> levelItems[i][j] = LevelItem.EMPTY;
                 }
             }
         }
@@ -69,11 +59,6 @@ public class GameUtils {
         }
     }
 
-    /**
-     * Moves all rangers randomly on the board.
-     *
-     * @return true if a ranger catches Yogi, false otherwise.
-     */
     public boolean moveRangersRandomly() {
         Position yogiPosition = yogi.getPosition();
         Position entrance = getEntrance();
@@ -103,17 +88,11 @@ public class GameUtils {
         return yogiCaught;
     }
 
-    /**
-     * Checks if the given position is valid and movable for a ranger.
-     *
-     * @param p The position to check.
-     * @return true if the position is valid and movable, false otherwise.
-     */
     private boolean isMovableForRanger(Position p) {
         if (!isValidPosition(p)) {
             return false;
         }
-        LevelItem li = level[p.y][p.x];
+        LevelItem li = levelItems[p.y][p.x];
 
         if (li != LevelItem.EMPTY) {
             return false;
@@ -126,28 +105,8 @@ public class GameUtils {
         return true;
     }
 
-    /**
-     * Handles Yogi's movement and checks if he encounters a ranger.
-     *
-     * @param newPosition The new position of Yogi.
-     * @return true if Yogi encounters a ranger, false otherwise.
-     */
-    public boolean handleYogiMove(Position newPosition) {
-        Position entrance = getEntrance();
-        for (Ranger ranger : rangers) {
-            if (ranger.getPosition().equals(newPosition) && !newPosition.equals(entrance)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
     public Yogi getYogi() {
         return yogi;
-    }
-
-    public void setYogi(Yogi yogi) {
-        this.yogi = yogi;
     }
 
     public List<Ranger> getRangers() {
@@ -163,71 +122,42 @@ public class GameUtils {
     }
 
     public LevelItem[][] getLevel() {
+        return levelItems;
+    }
+
+    public int getLevelNumber() {
         return level;
     }
 
-    public GameID getGameID() {
-        return gameID;
-    }
-
-    /**
-     * Checks if the given position is valid within the board.
-     *
-     * @param p The position to check.
-     * @return true if the position is valid, false otherwise.
-     */
     public boolean isValidPosition(Position p) {
         return p.x >= 0 && p.y >= 0 && p.x < cols && p.y < rows;
     }
 
-    /**
-     * Checks if the given position contains an obstacle.
-     *
-     * @param p The position to check.
-     * @return true if the position contains an obstacle, false otherwise.
-     */
     public boolean isObstacle(Position p) {
         if (!isValidPosition(p)) {
             return true;
         }
-        LevelItem li = level[p.y][p.x];
+        LevelItem li = levelItems[p.y][p.x];
         return li == LevelItem.TREE || li == LevelItem.MOUNTAIN;
     }
 
-    /**
-     * Collects a basket at the given position, if present.
-     *
-     * @param p The position to check for a basket.
-     * @return true if a basket was collected, false otherwise.
-     */
     public boolean collectBasket(Position p) {
-        if (isValidPosition(p) && level[p.y][p.x] == LevelItem.BASKET) {
-            level[p.y][p.x] = LevelItem.EMPTY;
+        if (isValidPosition(p) && levelItems[p.y][p.x] == LevelItem.BASKET) {
+            levelItems[p.y][p.x] = LevelItem.EMPTY;
             basketsCollected++;
             return true;
         }
         return false;
     }
 
-    /**
-     * Checks if all baskets in the level have been collected.
-     *
-     * @return true if all baskets are collected, false otherwise.
-     */
     public boolean allBasketsCollected() {
         return basketsCollected == numBaskets;
     }
 
-    /**
-     * Gets the entrance position on the board.
-     *
-     * @return The position of the entrance.
-     * @throws IllegalStateException if no entrance is found.
-     */
     public Position getEntrance() {
         for (int y = 0; y < rows; y++) {
             for (int x = 0; x < cols; x++) {
-                if (level[y][x] == LevelItem.ENTRANCE) {
+                if (levelItems[y][x] == LevelItem.ENTRANCE) {
                     return new Position(x, y);
                 }
             }
