@@ -10,9 +10,9 @@ import java.util.List;
  */
 public class DatabaseManager {
 
-    private static final String DB_URL = "jdbc:mysql://localhost:3306/yogi_game";
-    private static final String DB_USER = "root";
-    private static final String DB_PASSWORD = "(Football1498*)";
+    private static final String dataBaseUrl = "jdbc:mysql://localhost:3306/yogi_game";
+    private static final String dataBaseUSer = "root";
+    private static final String dataBasePassKey = "(Football1498*)";
 
     /**
      * Saves a player's score and game duration to the database. If the database already contains 10 entries, the oldest entry is removed.
@@ -22,7 +22,7 @@ public class DatabaseManager {
      * @param gameDuration The duration of the game in seconds.
      */
     public void savePlayerScore(String playerName, int score, long gameDuration) {
-        try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)) {
+        try (Connection connection = DriverManager.getConnection(dataBaseUrl, dataBaseUSer, dataBasePassKey)) {
             String countQuery = "SELECT COUNT(*) FROM player_scores";
             Statement countStatement = connection.createStatement();
             ResultSet countResult = countStatement.executeQuery(countQuery);
@@ -55,7 +55,7 @@ public class DatabaseManager {
      */
     public List<String> getLeaderboard() {
         List<String> leaderboard = new ArrayList<>();
-        try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)) {
+        try (Connection connection = DriverManager.getConnection(dataBaseUrl, dataBaseUSer, dataBasePassKey)) {
             String sql = "SELECT player_name, score, game_duration FROM player_scores ORDER BY score DESC, game_duration ASC";
             Statement statement = connection.createStatement();
             ResultSet resultSet = statement.executeQuery(sql);
@@ -94,7 +94,7 @@ public class DatabaseManager {
      * Resets the leaderboard by deleting all entries from the database.
      */
     public void resetLeaderboard() {
-        try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)) {
+        try (Connection connection = DriverManager.getConnection(dataBaseUrl, dataBaseUSer, dataBasePassKey)) {
             String sql = "DELETE FROM player_scores";
             PreparedStatement statement = connection.prepareStatement(sql);
             int rowsAffected = statement.executeUpdate();

@@ -6,7 +6,25 @@ import java.util.Objects;
  * Represents a position on the game board with x and y coordinates.
  */
 public class Position {
-    public int x, y;
+
+    private final int x;
+    private final int y;
+    
+    /**
+     * @return the x
+     */
+    public int getX() {
+        return x;
+    }
+
+
+    /**
+     * @return the y
+     */
+    
+    public int getY() {
+        return y;
+    }
 
     /**
      * Constructs a position with the specified coordinates.
@@ -26,7 +44,7 @@ public class Position {
      * @return A new position translated in the given direction.
      */
     public Position translate(Direction d) {
-        return new Position(x + d.x, y + d.y);
+        return new Position(getX() + d.x, getY() + d.y);
     }
 
     /**
@@ -40,7 +58,7 @@ public class Position {
         if (this == obj) return true;
         if (obj == null || getClass() != obj.getClass()) return false;
         Position other = (Position) obj;
-        return x == other.x && y == other.y;
+        return getX() == other.getX() && getY() == other.getY();
     }
 
     /**
@@ -50,7 +68,7 @@ public class Position {
      */
     @Override
     public int hashCode() {
-        return Objects.hash(x, y);
+        return Objects.hash(getX(), getY());
     }
 
     /**
@@ -60,6 +78,6 @@ public class Position {
      */
     @Override
     public String toString() {
-        return "Position{x=" + x + ", y=" + y + "}";
+        return "Position{x=" + getX() + ", y=" + getY() + "}";
     }
 }

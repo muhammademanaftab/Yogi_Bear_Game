@@ -12,7 +12,7 @@ public enum LevelItem {
     ENTRANCE('E'),
     YOGI('Y');
 
-    public final char representation;
+    private final char representation;
 
     /**
      * Constructs a LevelItem with a specific character representation.

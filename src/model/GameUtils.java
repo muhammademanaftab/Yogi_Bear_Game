@@ -92,7 +92,7 @@ public class GameUtils {
         if (!isValidPosition(p)) {
             return false;
         }
-        LevelItem li = levelItems[p.y][p.x];
+        LevelItem li = levelItems[p.getY()][p.getX()];
 
         if (li != LevelItem.EMPTY) {
             return false;
@@ -130,20 +130,20 @@ public class GameUtils {
     }
 
     public boolean isValidPosition(Position p) {
-        return p.x >= 0 && p.y >= 0 && p.x < cols && p.y < rows;
+        return p.getX() >= 0 && p.getY() >= 0 && p.getX() < cols && p.getY() < rows;
     }
 
     public boolean isObstacle(Position p) {
         if (!isValidPosition(p)) {
             return true;
         }
-        LevelItem li = levelItems[p.y][p.x];
+        LevelItem li = levelItems[p.getY()][p.getX()];
         return li == LevelItem.TREE || li == LevelItem.MOUNTAIN;
     }
 
     public boolean collectBasket(Position p) {
-        if (isValidPosition(p) && levelItems[p.y][p.x] == LevelItem.BASKET) {
-            levelItems[p.y][p.x] = LevelItem.EMPTY;
+        if (isValidPosition(p) && levelItems[p.getY()][p.getX()] == LevelItem.BASKET) {
+            levelItems[p.getY()][p.getX()] = LevelItem.EMPTY;
             basketsCollected++;
             return true;
         }

@@ -116,7 +116,7 @@ public class Board extends JPanel {
     private void drawRangers(Graphics2D gr) {
         for (var ranger : game.getCurrentLevel().getRangers()) {
             Position rangerPos = ranger.getPosition();
-            gr.drawImage(rangerImg, rangerPos.x * tileSize, rangerPos.y * tileSize, tileSize, tileSize, null);
+            gr.drawImage(rangerImg, rangerPos.getX() * tileSize, rangerPos.getY() * tileSize, tileSize, tileSize, null);
         }
     }
 
@@ -127,6 +127,6 @@ public class Board extends JPanel {
      */
     private void drawYogi(Graphics2D gr) {
         Position yogiPosition = game.getCurrentLevel().getYogi().getPosition();
-        gr.drawImage(yogiImg, yogiPosition.x * tileSize, yogiPosition.y * tileSize, tileSize, tileSize, null);
+        gr.drawImage(yogiImg, yogiPosition.getX() * tileSize, yogiPosition.getY() * tileSize, tileSize, tileSize, null);
     }
 }

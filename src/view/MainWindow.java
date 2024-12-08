@@ -1,6 +1,7 @@
 package view;
 
 import java.awt.*;
+import java.awt.event.ActionEvent;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.io.IOException;
@@ -47,14 +48,7 @@ public class MainWindow extends JFrame {
             System.exit(0);
         }
 
-        GameMenu gameMenu = new GameMenu(
-                this::loadLevel,
-                this::restartGame,
-                this::exitGame,
-                databaseManager::showLeaderboard
-        );
-
-        setJMenuBar(gameMenu.getMenuBar());
+        setJMenuBar(createMenuBar());
         setLayout(new BorderLayout(0, 10));
         gameStatusLabel = new JLabel("Welcome to Yogi Bear Game!");
         add(gameStatusLabel, BorderLayout.NORTH);
@@ -80,6 +74,60 @@ public class MainWindow extends JFrame {
 
         setLocationRelativeTo(null);
         setVisible(true);
+    }
+
+    /**
+     * Creates the menu bar with game and level selection options.
+     *
+     * @return The constructed menu bar.
+     */
+    private JMenuBar createMenuBar() {
+        JMenuBar menuBar = new JMenuBar();
+
+        JMenu menuGame = new JMenu("Game");
+        menuGame.add(new JMenuItem(new AbstractAction("Restart") {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                restartGame();
+            }
+        }));
+        menuGame.add(new JMenuItem(new AbstractAction("Leaderboard") {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                databaseManager.showLeaderboard();
+            }
+        }));
+        menuGame.add(new JMenuItem(new AbstractAction("Exit") {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                exitGame();
+            }
+        }));
+        menuBar.add(menuGame);
+
+        JMenu menuLevelSelect = new JMenu("Select Level");
+        int totalLevels = Levels.getTotalLevels();
+        for (int i = 1; i <= totalLevels; i++) {
+            final int levelNumber = i;
+            JMenuItem levelItem = new JMenuItem(new AbstractAction("Level " + levelNumber) {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    int confirm = JOptionPane.showConfirmDialog(
+                        null,
+                        "Are you sure you want to start Level " + levelNumber + "?",
+                        "Confirm Level Selection",
+                        JOptionPane.YES_NO_OPTION
+                    );
+                    if (confirm == JOptionPane.YES_OPTION) {
+                        loadLevel(levelNumber);
+                    }
+                }
+            });
+            menuLevelSelect.add(levelItem);
+        }
+        menuBar.add(menuLevelSelect);
+
+        return menuBar;
     }
 
     /**

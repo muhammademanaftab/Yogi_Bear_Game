@@ -11,9 +11,9 @@ import java.util.Vector;
  */
 public class LeaderboardDialog extends JDialog {
 
-    private static final String DB_URL = "jdbc:mysql://localhost:3306/yogi_game";
-    private static final String DB_USER = "root";
-    private static final String DB_PASSWORD = "(Football1498*)";
+    private static final String dataBaseURL = "jdbc:mysql://localhost:3306/yogi_game";
+    private static final String dataBaseUSer = "root";
+    private static final String dataBasePassKey = "(Football1498*)";
 
     /**
      * Constructs the leaderboard dialog window.
@@ -27,7 +27,7 @@ public class LeaderboardDialog extends JDialog {
         setLocationRelativeTo(parent);
 
         JTable leaderboardTable = new JTable();
-        leaderboardTable.setModel(fetchLeaderboardData());
+        leaderboardTable.setModel(fetchData());
 
         add(new JScrollPane(leaderboardTable), BorderLayout.CENTER);
 
@@ -41,14 +41,14 @@ public class LeaderboardDialog extends JDialog {
      *
      * @return A DefaultTableModel containing the leaderboard data.
      */
-    private DefaultTableModel fetchLeaderboardData() {
+    private DefaultTableModel fetchData() {
         DefaultTableModel model = new DefaultTableModel();
         model.addColumn("Rank");
         model.addColumn("Player Name");
         model.addColumn("Score");
         model.addColumn("Game Duration (s)");
 
-        try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)) {
+        try (Connection connection = DriverManager.getConnection(dataBaseURL, dataBaseUSer, dataBasePassKey)) {
             String query = "SELECT player_name, score, game_duration " +
                            "FROM player_scores ORDER BY score DESC, game_duration ASC LIMIT 10";
             PreparedStatement statement = connection.prepareStatement(query);
