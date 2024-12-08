@@ -4,6 +4,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+/**
+ * Handles game logic for each level, including Yogi and Ranger movements,
+ * collecting baskets, and managing obstacles.
+ */
 public class GameUtils {
 
     private final GameID gameID;
@@ -15,6 +19,12 @@ public class GameUtils {
     private int basketsCollected;
     private final Random random = new Random();
 
+    /**
+     * Constructs a new GameUtils instance based on the provided level layout.
+     *
+     * @param gameLevelRows The level layout as a list of strings.
+     * @param gameID        The unique identifier for the level.
+     */
     public GameUtils(ArrayList<String> gameLevelRows, GameID gameID) {
         this.gameID = gameID;
         rows = gameLevelRows.size();
@@ -29,33 +39,27 @@ public class GameUtils {
             for (int j = 0; j < cols; j++) {
                 char c = j < row.length() ? row.charAt(j) : ' ';
                 switch (c) {
-                    case 'Y':
+                    case 'Y' -> {
                         yogi = new Yogi(new Position(j, i));
                         level[i][j] = LevelItem.EMPTY;
-                        break;
-                    case 'B':
+                    }
+                    case 'B' -> {
                         numBaskets++;
                         level[i][j] = LevelItem.BASKET;
-                        break;
-                    case 'T':
-                        level[i][j] = LevelItem.TREE;
-                        break;
-                    case 'M':
-                        level[i][j] = LevelItem.MOUNTAIN;
-                        break;
-                    case 'E':
+                    }
+                    case 'T' -> level[i][j] = LevelItem.TREE;
+                    case 'M' -> level[i][j] = LevelItem.MOUNTAIN;
+                    case 'E' -> {
                         level[i][j] = LevelItem.ENTRANCE;
                         if (yogi == null) {
                             yogi = new Yogi(new Position(j, i));
                         }
-                        break;
-                    case 'R':
+                    }
+                    case 'R' -> {
                         rangers.add(new Ranger(new Position(j, i)));
                         level[i][j] = LevelItem.EMPTY;
-                        break;
-                    default:
-                        level[i][j] = LevelItem.EMPTY;
-                        break;
+                    }
+                    default -> level[i][j] = LevelItem.EMPTY;
                 }
             }
         }
@@ -65,67 +69,77 @@ public class GameUtils {
         }
     }
 
-   public boolean moveRangersRandomly() {
-    Position yogiPosition = yogi.getPosition();
-    Position entrance = getEntrance();
-    boolean yogiCaught = false;
+    /**
+     * Moves all rangers randomly on the board.
+     *
+     * @return true if a ranger catches Yogi, false otherwise.
+     */
+    public boolean moveRangersRandomly() {
+        Position yogiPosition = yogi.getPosition();
+        Position entrance = getEntrance();
+        boolean yogiCaught = false;
 
-    for (Ranger ranger : rangers) {
-        Position currentPosition = ranger.getPosition();
-        List<Direction> possibleDirections = new ArrayList<>();
+        for (Ranger ranger : rangers) {
+            Position currentPosition = ranger.getPosition();
+            List<Direction> possibleDirections = new ArrayList<>();
 
-        // Check all valid directions for the ranger
-        for (Direction d : Direction.values()) {
-            Position newPosition = currentPosition.translate(d);
-            if (isValidPosition(newPosition) && isMovableForRanger(newPosition)) {
-                possibleDirections.add(d);
+            for (Direction d : Direction.values()) {
+                Position newPosition = currentPosition.translate(d);
+                if (isValidPosition(newPosition) && isMovableForRanger(newPosition)) {
+                    possibleDirections.add(d);
+                }
+            }
+
+            if (!possibleDirections.isEmpty()) {
+                Direction randomDirection = possibleDirections.get(random.nextInt(possibleDirections.size()));
+                Position newPosition = currentPosition.translate(randomDirection);
+                ranger.setPosition(newPosition);
+
+                if (newPosition.equals(yogiPosition) && !yogiPosition.equals(entrance)) {
+                    yogiCaught = true;
+                }
             }
         }
-
-        // Move to a random valid direction if available
-        if (!possibleDirections.isEmpty()) {
-            Direction randomDirection = possibleDirections.get(random.nextInt(possibleDirections.size()));
-            Position newPosition = currentPosition.translate(randomDirection);
-            ranger.setPosition(newPosition);
-
-            // Check if the ranger moved to Yogi's position
-            if (newPosition.equals(yogiPosition) && !yogiPosition.equals(entrance)) {
-                yogiCaught = true;
-            }
-        }
+        return yogiCaught;
     }
-    return yogiCaught; // Return true if Yogi is caught by a ranger
-}
 
+    /**
+     * Checks if the given position is valid and movable for a ranger.
+     *
+     * @param p The position to check.
+     * @return true if the position is valid and movable, false otherwise.
+     */
     private boolean isMovableForRanger(Position p) {
         if (!isValidPosition(p)) {
             return false;
         }
         LevelItem li = level[p.y][p.x];
 
-        // Ensure Rangers cannot move to trees, mountains, baskets, entrances, or positions with other Rangers
         if (li != LevelItem.EMPTY) {
             return false;
         }
         for (Ranger ranger : rangers) {
             if (ranger.getPosition().equals(p)) {
-                return false; // Another Ranger is already at this position
+                return false;
             }
         }
         return true;
     }
 
+    /**
+     * Handles Yogi's movement and checks if he encounters a ranger.
+     *
+     * @param newPosition The new position of Yogi.
+     * @return true if Yogi encounters a ranger, false otherwise.
+     */
     public boolean handleYogiMove(Position newPosition) {
         Position entrance = getEntrance();
-
-        // If Yogi moves into a ranger's position
         for (Ranger ranger : rangers) {
             if (ranger.getPosition().equals(newPosition) && !newPosition.equals(entrance)) {
-                System.out.println("Yogi moved to a Ranger's position! Yogi dies!");
-                return true; // Indicates Yogi has died
+                return true;
             }
         }
-        return false; // Indicates Yogi is safe
+        return false;
     }
 
     public Yogi getYogi() {
@@ -156,10 +170,22 @@ public class GameUtils {
         return gameID;
     }
 
+    /**
+     * Checks if the given position is valid within the board.
+     *
+     * @param p The position to check.
+     * @return true if the position is valid, false otherwise.
+     */
     public boolean isValidPosition(Position p) {
         return p.x >= 0 && p.y >= 0 && p.x < cols && p.y < rows;
     }
 
+    /**
+     * Checks if the given position contains an obstacle.
+     *
+     * @param p The position to check.
+     * @return true if the position contains an obstacle, false otherwise.
+     */
     public boolean isObstacle(Position p) {
         if (!isValidPosition(p)) {
             return true;
@@ -168,6 +194,12 @@ public class GameUtils {
         return li == LevelItem.TREE || li == LevelItem.MOUNTAIN;
     }
 
+    /**
+     * Collects a basket at the given position, if present.
+     *
+     * @param p The position to check for a basket.
+     * @return true if a basket was collected, false otherwise.
+     */
     public boolean collectBasket(Position p) {
         if (isValidPosition(p) && level[p.y][p.x] == LevelItem.BASKET) {
             level[p.y][p.x] = LevelItem.EMPTY;
@@ -177,19 +209,21 @@ public class GameUtils {
         return false;
     }
 
+    /**
+     * Checks if all baskets in the level have been collected.
+     *
+     * @return true if all baskets are collected, false otherwise.
+     */
     public boolean allBasketsCollected() {
         return basketsCollected == numBaskets;
     }
 
-//    public boolean isNearRanger(Position p) {
-//        for (Ranger ranger : rangers) {
-//            if (ranger.isNear(p)) {
-//                return true;
-//            }
-//        }
-//        return false;
-//    }
-
+    /**
+     * Gets the entrance position on the board.
+     *
+     * @return The position of the entrance.
+     * @throws IllegalStateException if no entrance is found.
+     */
     public Position getEntrance() {
         for (int y = 0; y < rows; y++) {
             for (int x = 0; x < cols; x++) {

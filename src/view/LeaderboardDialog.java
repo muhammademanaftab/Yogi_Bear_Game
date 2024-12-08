@@ -6,15 +6,22 @@ import java.awt.*;
 import java.sql.*;
 import java.util.Vector;
 
+/**
+ * Displays a leaderboard in a dialog window, fetching data from the database.
+ */
 public class LeaderboardDialog extends JDialog {
 
     private static final String DB_URL = "jdbc:mysql://localhost:3306/yogi_game";
     private static final String DB_USER = "root";
     private static final String DB_PASSWORD = "(Football1498*)";
 
+    /**
+     * Constructs the leaderboard dialog window.
+     *
+     * @param parent The parent frame from which this dialog is displayed.
+     */
     public LeaderboardDialog(JFrame parent) {
         super(parent, "Leaderboard", true);
-
         setLayout(new BorderLayout());
         setSize(500, 400);
         setLocationRelativeTo(parent);
@@ -29,6 +36,11 @@ public class LeaderboardDialog extends JDialog {
         add(closeButton, BorderLayout.SOUTH);
     }
 
+    /**
+     * Fetches leaderboard data from the database and populates a table model.
+     *
+     * @return A DefaultTableModel containing the leaderboard data.
+     */
     private DefaultTableModel fetchLeaderboardData() {
         DefaultTableModel model = new DefaultTableModel();
         model.addColumn("Rank");

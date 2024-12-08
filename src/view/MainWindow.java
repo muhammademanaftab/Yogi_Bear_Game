@@ -1,6 +1,6 @@
 package view;
 
-import java.awt.BorderLayout;
+import java.awt.*;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.io.IOException;
@@ -15,60 +15,63 @@ import model.GameID;
 import model.Levels;
 import model.Position;
 
+/**
+ * Main game window for the Yogi Bear Game.
+ * Handles game initialization, level management, player interactions, and game state updates.
+ */
 public class MainWindow extends JFrame {
 
     private final Game game;
+    private final DatabaseManager databaseManager;
     private Board board;
     private final JLabel gameStatusLabel;
     private Timer rangerMovementTimer;
     private boolean isRespawning = false;
     private boolean isLevelActive = true;
+    private Instant gameStartTime;
 
-    private Instant gameStartTime; // To track when the game starts
-    private final DatabaseManager databaseManager; // DatabaseManager instance
-
+    /**
+     * Constructs the main game window and initializes the game.
+     *
+     * @throws IOException if there is an issue loading game resources.
+     */
     public MainWindow() throws IOException {
         game = new Game();
         databaseManager = new DatabaseManager();
 
         setTitle("Yogi Bear Game");
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+        setResizable(false);
+        setSize(800, 600);
 
-        // Show the About panel at the start of the game
-        showAboutPanel();
+        if (!showAboutPanel()) {
+            System.exit(0);
+        }
 
-        // Initialize menu
         GameMenu gameMenu = new GameMenu(
-                this::loadLevel, // Level selection callback
-                this::restartGame, // Restart callback
-                this::exitGame, // Exit callback
-                this::scaleGame, // Scale callback
-                databaseManager::showLeaderboard // Leaderboard callback
+                this::loadLevel,
+                this::restartGame,
+                this::exitGame,
+                databaseManager::showLeaderboard
         );
 
         setJMenuBar(gameMenu.getMenuBar());
-
-        // Layout setup
         setLayout(new BorderLayout(0, 10));
         gameStatusLabel = new JLabel("Welcome to Yogi Bear Game!");
         add(gameStatusLabel, BorderLayout.NORTH);
 
         board = new Board(game);
-        board.setScale(1.5); // Set default scale to 1.5
         add(board, BorderLayout.CENTER);
 
-        // Timer for ranger movement
         rangerMovementTimer = new Timer(500, e -> {
             if (!isRespawning && isLevelActive) {
                 handleRangerMovement();
             }
         });
 
-        // Load the first level and start the game timer
         gameStartTime = Instant.now();
         loadLevel(1);
 
-        // Key listener for Yogi's movement
         addKeyListener(new KeyAdapter() {
             @Override
             public void keyPressed(KeyEvent e) {
@@ -80,47 +83,65 @@ public class MainWindow extends JFrame {
         setVisible(true);
     }
 
-    private void showAboutPanel() {
+    /**
+     * Displays the about panel with game rules and objective.
+     *
+     * @return true if the user agrees to proceed, false otherwise.
+     */
+    private boolean showAboutPanel() {
         String aboutMessage = """
                 Welcome to Yogi Bear Game!
                 
-                Collect all the picnic baskets while avoiding rangers. 
-                Yogi has 3 lives and loses one if a ranger gets close.
+                Objective:
+                - Collect all picnic baskets while avoiding rangers.
+                - Enter through the blue entrance to start.
+                
                 Obstacles:
-                - Mountains: Grey Triangles
-                - Trees: Green Triangles
-                - Rangers: Red Circles
+                - Mountains: Blocks Yogi's path.
+                - Trees: Also blocks Yogi's path.
+                - Rangers: Moves around; Yogi loses a life if caught.
+                
                 Visuals:
-                - Baskets: Yellow Squares
-                - Yogi: Yellow Circle
-                - Entrance: Blue Rectangle
-
+                - Baskets: Collect them to score points.
+                - Yogi: Represents the player.
+                - Entrance: Start position.
+                
+                Rules:
+                - Yogi starts with 3 lives.
+                - Losing all lives ends the game.
+                
                 Good luck and have fun!
                 """;
 
-        JOptionPane.showMessageDialog(
-                this,
-                aboutMessage,
-                "About Yogi Bear Game",
-                JOptionPane.INFORMATION_MESSAGE
-        );
+        int result = JOptionPane.showConfirmDialog(
+                this, aboutMessage, "About Yogi Bear Game", JOptionPane.OK_CANCEL_OPTION, JOptionPane.INFORMATION_MESSAGE);
+        return result == JOptionPane.OK_OPTION;
     }
 
+    /**
+     * Restarts the game by resetting the game state and reloading the first level.
+     */
     private void restartGame() {
-        gameStartTime = Instant.now(); // Reset game timer
+        gameStartTime = Instant.now();
+        game.resetGame();
         loadLevel(1);
+        isLevelActive = true;
+        rangerMovementTimer.start();
+        updateStatusLabel();
     }
 
+    /**
+     * Exits the game application.
+     */
     private void exitGame() {
         System.exit(0);
     }
 
-    private void scaleGame(double scale) {
-        if (board.setScale(scale)) {
-            pack();
-        }
-    }
-
+    /**
+     * Loads a specific level in the game.
+     *
+     * @param levelNumber the level number to load.
+     */
     private void loadLevel(int levelNumber) {
         try {
             ArrayList<String> levelLayout = Levels.getLevel(levelNumber);
@@ -138,26 +159,23 @@ public class MainWindow extends JFrame {
         }
     }
 
+    /**
+     * Handles key press events for moving Yogi in the game.
+     *
+     * @param e the key event triggered by the player.
+     */
     private void handleKeyPress(KeyEvent e) {
         if (isRespawning || !isLevelActive) {
             return;
         }
 
-        Direction direction = null;
-        switch (e.getKeyCode()) {
-            case KeyEvent.VK_UP:
-                direction = Direction.UP;
-                break;
-            case KeyEvent.VK_DOWN:
-                direction = Direction.DOWN;
-                break;
-            case KeyEvent.VK_LEFT:
-                direction = Direction.LEFT;
-                break;
-            case KeyEvent.VK_RIGHT:
-                direction = Direction.RIGHT;
-                break;
-        }
+        Direction direction = switch (e.getKeyCode()) {
+            case KeyEvent.VK_UP -> Direction.UP;
+            case KeyEvent.VK_DOWN -> Direction.DOWN;
+            case KeyEvent.VK_LEFT -> Direction.LEFT;
+            case KeyEvent.VK_RIGHT -> Direction.RIGHT;
+            default -> null;
+        };
 
         if (direction != null && game.moveYogi(direction)) {
             handleYogiAndRangerCollision();
@@ -168,12 +186,18 @@ public class MainWindow extends JFrame {
         updateStatusLabel();
     }
 
+    /**
+     * Handles the random movement of rangers in the game.
+     */
     private void handleRangerMovement() {
         game.getCurrentLevel().moveRangersRandomly();
         handleYogiAndRangerCollision();
         board.refresh();
     }
 
+    /**
+     * Handles collisions between Yogi and rangers, including life loss logic.
+     */
     private void handleYogiAndRangerCollision() {
         Position yogiPosition = game.getCurrentLevel().getYogi().getPosition();
         Position entrancePosition = game.getCurrentLevel().getEntrance();
@@ -190,11 +214,17 @@ public class MainWindow extends JFrame {
         }
     }
 
+    /**
+     * Handles the logic for losing a life when Yogi is caught by a ranger.
+     */
     private void handleYogiLifeLoss() {
         Position entrancePosition = game.getCurrentLevel().getEntrance();
         game.loseLife();
 
         if (game.isGameOver()) {
+            isLevelActive = false;
+            rangerMovementTimer.stop();
+            offerToSaveScore("Game Over! Yogi has no lives left.");
             showGameOverDialog("Game Over! Yogi has no lives left.");
         } else {
             isRespawning = true;
@@ -204,49 +234,81 @@ public class MainWindow extends JFrame {
         }
     }
 
+    /**
+     * Handles post-movement logic, such as level completion or victory.
+     */
     private void handlePostMoveLogic() {
         if (game.getCurrentLevel().allBasketsCollected()) {
             isLevelActive = false;
             rangerMovementTimer.stop();
             JOptionPane.showMessageDialog(this, "Level Completed! Press OK to load the next level.", "Level Complete", JOptionPane.INFORMATION_MESSAGE);
             loadNextLevel();
-            return;
         }
 
         if (game.isVictory()) {
             isLevelActive = false;
             rangerMovementTimer.stop();
-            savePlayerScore();
+            offerToSaveScore("Congratulations! You won the game!");
             showVictoryDialog("Congratulations! You won the game!");
         }
     }
 
+    /**
+     * Loads the next level or displays the victory dialog if all levels are completed.
+     */
     private void loadNextLevel() {
         int currentLevel = game.getCurrentLevel().getGameID().level;
         if (currentLevel >= Levels.getTotalLevels()) {
             isLevelActive = false;
-            savePlayerScore();
+            offerToSaveScore("Congratulations! You completed all levels!");
             showVictoryDialog("Congratulations! You completed all levels!");
         } else {
             loadLevel(currentLevel + 1);
         }
     }
 
+    /**
+     * Updates the game status label to reflect the current lives and score.
+     */
     private void updateStatusLabel() {
         gameStatusLabel.setText("Lives: " + game.getLives() + ", Score: " + game.getScore());
     }
 
+    /**
+     * Offers the player the option to save their score to the leaderboard.
+     *
+     * @param message the message to display in the dialog.
+     */
+    private void offerToSaveScore(String message) {
+        int option = JOptionPane.showConfirmDialog(
+                this,
+                message + "\nWould you like to save your score to the leaderboard?",
+                "Save Score",
+                JOptionPane.YES_NO_OPTION,
+                JOptionPane.INFORMATION_MESSAGE
+        );
+
+        if (option == JOptionPane.YES_OPTION) {
+            savePlayerScore();
+        }
+    }
+
+    /**
+     * Saves the player's score to the database.
+     */
     private void savePlayerScore() {
         String playerName = JOptionPane.showInputDialog(this, "Enter your name:", "Save Score", JOptionPane.PLAIN_MESSAGE);
         if (playerName == null || playerName.trim().isEmpty()) {
             playerName = "Anonymous";
         }
-        int score = game.getScore();
-        long gameDuration = Duration.between(gameStartTime, Instant.now()).toSeconds(); // Calculate game duration
-
-        databaseManager.savePlayerScore(playerName, score, gameDuration); // Use DatabaseManager
+        databaseManager.savePlayerScore(playerName, game.getScore(), Duration.between(gameStartTime, Instant.now()).toSeconds());
     }
 
+    /**
+     * Displays the victory dialog with options to restart, view the leaderboard, or exit.
+     *
+     * @param message the victory message to display.
+     */
     private void showVictoryDialog(String message) {
         int option = JOptionPane.showOptionDialog(
                 this,
@@ -259,13 +321,21 @@ public class MainWindow extends JFrame {
                 "Show Leaderboard"
         );
 
-        switch (option) {
-            case 0 -> databaseManager.showLeaderboard();
-            case 1 -> restartGame();
-            case 2 -> exitGame();
+        if (option == 0) {
+            databaseManager.showLeaderboard();
+            showVictoryDialog(message);
+        } else if (option == 1) {
+            restartGame();
+        } else if (option == 2) {
+            exitGame();
         }
     }
 
+    /**
+     * Displays the game over dialog with options to restart, view the leaderboard, or exit.
+     *
+     * @param message the game over message to display.
+     */
     private void showGameOverDialog(String message) {
         int option = JOptionPane.showOptionDialog(
                 this,
@@ -274,16 +344,25 @@ public class MainWindow extends JFrame {
                 JOptionPane.DEFAULT_OPTION,
                 JOptionPane.INFORMATION_MESSAGE,
                 null,
-                new String[]{"Restart", "Exit"},
+                new String[]{"Show Leaderboard", "Restart", "Exit"},
                 "Restart"
         );
 
-        switch (option) {
-            case 0 -> restartGame();
-            case 1 -> exitGame();
+        if (option == 0) {
+            databaseManager.showLeaderboard();
+            showGameOverDialog(message);
+        } else if (option == 1) {
+            restartGame();
+        } else if (option == 2) {
+            exitGame();
         }
     }
 
+    /**
+     * Main method to launch the game application.
+     *
+     * @param args command-line arguments (not used).
+     */
     public static void main(String[] args) {
         try {
             new MainWindow();

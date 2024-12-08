@@ -1,41 +1,52 @@
 package view;
+
 import model.*;
 import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.util.function.Consumer;
 
+/**
+ * Represents the game's menu bar, including options for level selection, restarting, showing the leaderboard, and exiting.
+ */
 public class GameMenu {
 
     private final JMenuBar menuBar;
 
+    /**
+     * Constructs the GameMenu and initializes its components.
+     *
+     * @param onLevelSelected    Callback for selecting a level.
+     * @param onRestart          Callback for restarting the game.
+     * @param onExit             Callback for exiting the game.
+     * @param onShowLeaderboard  Callback for showing the leaderboard.
+     */
     public GameMenu(
-        Consumer<Integer> onLevelSelected, 
-        Runnable onRestart, 
-        Runnable onExit, 
-        Consumer<Double> onScaleSelected, 
+        Consumer<Integer> onLevelSelected,
+        Runnable onRestart,
+        Runnable onExit,
         Runnable onShowLeaderboard
     ) {
         menuBar = new JMenuBar();
 
-        // Game Menu
         JMenu menuGame = new JMenu("Game");
         createGameMenu(menuGame, onRestart, onExit, onShowLeaderboard);
 
-        // Level Selection Menu
         JMenu menuLevelSelect = new JMenu("Select Level");
         createLevelSelectMenu(menuLevelSelect, onLevelSelected);
 
-        // Scale Menu
-        JMenu menuGameScale = new JMenu("Scale");
-        createScaleMenu(menuGameScale, 1.0, 2.0, 0.5, onScaleSelected);
-
         menuBar.add(menuGame);
         menuBar.add(menuLevelSelect);
-        menuBar.add(menuGameScale);
     }
 
+    /**
+     * Creates the "Game" menu with options to restart, show the leaderboard, or exit.
+     *
+     * @param menu                The menu to populate.
+     * @param onRestart           Callback for restarting the game.
+     * @param onExit              Callback for exiting the game.
+     * @param onShowLeaderboard   Callback for showing the leaderboard.
+     */
     private void createGameMenu(JMenu menu, Runnable onRestart, Runnable onExit, Runnable onShowLeaderboard) {
-        // Restart Game Menu Item
         JMenuItem restartItem = new JMenuItem(new AbstractAction("Restart") {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -44,7 +55,6 @@ public class GameMenu {
         });
         menu.add(restartItem);
 
-        // Show Leaderboard Menu Item
         JMenuItem leaderboardItem = new JMenuItem(new AbstractAction("Leaderboard") {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -53,7 +63,6 @@ public class GameMenu {
         });
         menu.add(leaderboardItem);
 
-        // Exit Game Menu Item
         JMenuItem exitItem = new JMenuItem(new AbstractAction("Exit") {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -63,8 +72,14 @@ public class GameMenu {
         menu.add(exitItem);
     }
 
+    /**
+     * Creates the "Select Level" menu with options for selecting a specific level.
+     *
+     * @param menu             The menu to populate.
+     * @param onLevelSelected  Callback for selecting a level.
+     */
     private void createLevelSelectMenu(JMenu menu, Consumer<Integer> onLevelSelected) {
-        int totalLevels = Levels.getTotalLevels(); // Dynamically fetch the total levels
+        int totalLevels = Levels.getTotalLevels();
         for (int i = 1; i <= totalLevels; i++) {
             final int levelNumber = i;
             JMenuItem levelItem = new JMenuItem(new AbstractAction("Level " + levelNumber) {
@@ -85,20 +100,11 @@ public class GameMenu {
         }
     }
 
-    private void createScaleMenu(JMenu menu, double from, double to, double by, Consumer<Double> onScaleSelected) {
-        while (from <= to) {
-            final double scale = from;
-            JMenuItem scaleItem = new JMenuItem(new AbstractAction(from + "x") {
-                @Override
-                public void actionPerformed(ActionEvent e) {
-                    onScaleSelected.accept(scale);
-                }
-            });
-            menu.add(scaleItem);
-            from += by;
-        }
-    }
-
+    /**
+     * Returns the menu bar for the game.
+     *
+     * @return The constructed menu bar.
+     */
     public JMenuBar getMenuBar() {
         return menuBar;
     }

@@ -9,24 +9,29 @@ import model.LevelItem;
 import model.Position;
 import res.ResourceLoader;
 
+/**
+ * Represents the game board where all game elements are displayed.
+ */
 public class Board extends JPanel {
 
     private final Game game;
-    private double scale = 1.0;
-    private final int tileSize = 32; // Default size of each tile
-    private int scaledSize = tileSize;
-
+    private int tileSize = 64; // Default tile size
     private final EnumMap<LevelItem, Image> itemImages = new EnumMap<>(LevelItem.class);
     private Image rangerImg;
     private Image yogiImg;
 
+    /**
+     * Initializes the board with the provided game instance and loads necessary images.
+     *
+     * @param game The current game instance.
+     */
     public Board(Game game) {
         this.game = game;
         loadImages();
     }
 
     /**
-     * Load images for all LevelItem types and entities.
+     * Loads images for all game elements.
      */
     private void loadImages() {
         try {
@@ -43,29 +48,22 @@ public class Board extends JPanel {
     }
 
     /**
-     * Adjust the board scale and refresh the display.
+     * Refreshes the board dimensions based on the game state and screen size.
      *
-     * @param scale New scale value.
-     * @return True if refreshed successfully.
-     */
-    public boolean setScale(double scale) {
-        this.scale = scale;
-        this.scaledSize = (int) (scale * tileSize);
-        return refresh();
-    }
-
-    /**
-     * Refresh the board's dimensions and repaint.
-     *
-     * @return True if the current level is not null.
+     * @return True if the board was refreshed successfully, false otherwise.
      */
     public boolean refresh() {
         if (game.getCurrentLevel() == null) return false;
 
-        setPreferredSize(new Dimension(
-            game.getCurrentLevel().getCols() * scaledSize,
-            game.getCurrentLevel().getRows() * scaledSize
-        ));
+        int rows = game.getCurrentLevel().getRows();
+        int cols = game.getCurrentLevel().getCols();
+        Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+
+        // Dynamically adjust tile size based on available screen space
+        tileSize = Math.min(screenSize.height / rows / 2, screenSize.width / cols / 2);
+
+        setPreferredSize(new Dimension(cols * tileSize, rows * tileSize));
+        revalidate();
         repaint();
         return true;
     }
@@ -82,7 +80,9 @@ public class Board extends JPanel {
     }
 
     /**
-     * Draws the level grid and its items.
+     * Draws the grid and level items on the board.
+     *
+     * @param gr The graphics context for drawing.
      */
     private void drawLevel(Graphics2D gr) {
         int rows = game.getCurrentLevel().getRows();
@@ -93,39 +93,40 @@ public class Board extends JPanel {
                 LevelItem item = game.getCurrentLevel().getLevel()[y][x];
 
                 if (item == LevelItem.EMPTY) {
-                    // Fill empty cells with white background
                     gr.setColor(Color.WHITE);
-                    gr.fillRect(x * scaledSize, y * scaledSize, scaledSize, scaledSize);
+                    gr.fillRect(x * tileSize, y * tileSize, tileSize, tileSize);
                 } else {
-                    // Draw image for other LevelItems
                     Image img = itemImages.get(item);
                     if (img != null) {
-                        gr.drawImage(img, x * scaledSize, y * scaledSize, scaledSize, scaledSize, null);
+                        gr.drawImage(img, x * tileSize, y * tileSize, tileSize, tileSize, null);
                     }
                 }
 
-                // Draw grid border
                 gr.setColor(Color.BLACK);
-                gr.drawRect(x * scaledSize, y * scaledSize, scaledSize, scaledSize);
+                gr.drawRect(x * tileSize, y * tileSize, tileSize, tileSize);
             }
         }
     }
 
     /**
      * Draws all rangers on the board.
+     *
+     * @param gr The graphics context for drawing.
      */
     private void drawRangers(Graphics2D gr) {
         for (var ranger : game.getCurrentLevel().getRangers()) {
             Position rangerPos = ranger.getPosition();
-            gr.drawImage(rangerImg, rangerPos.x * scaledSize, rangerPos.y * scaledSize, scaledSize, scaledSize, null);
+            gr.drawImage(rangerImg, rangerPos.x * tileSize, rangerPos.y * tileSize, tileSize, tileSize, null);
         }
     }
 
     /**
      * Draws Yogi's position on the board.
+     *
+     * @param gr The graphics context for drawing.
      */
     private void drawYogi(Graphics2D gr) {
         Position yogiPosition = game.getCurrentLevel().getYogi().getPosition();
-        gr.drawImage(yogiImg, yogiPosition.x * scaledSize, yogiPosition.y * scaledSize, scaledSize, scaledSize, null);
+        gr.drawImage(yogiImg, yogiPosition.x * tileSize, yogiPosition.y * tileSize, tileSize, tileSize, null);
     }
 }

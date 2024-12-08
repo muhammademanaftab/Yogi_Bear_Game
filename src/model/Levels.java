@@ -2,127 +2,112 @@ package model;
 
 import java.util.ArrayList;
 
+/**
+ * Provides level configurations for the Yogi Bear game.
+ */
 public class Levels {
+
+    /**
+     * Retrieves the layout of the specified level.
+     *
+     * @param levelNumber The number of the level to retrieve.
+     * @return A list of strings representing the level's grid.
+     */
     public static ArrayList<String> getLevel(int levelNumber) {
         ArrayList<String> levelRows = new ArrayList<>();
         switch (levelNumber) {
-            case 1: // Small and simple: 6x6
-                levelRows.add("E  M  ");
-                levelRows.add("  B   ");
-                levelRows.add("   T  ");
-                levelRows.add("    R ");
-                levelRows.add("  B   ");
-                levelRows.add("      ");
-                break;
-
-            case 2: // Slightly harder: 7x7
-                levelRows.add("E     B");
-                levelRows.add("   T T ");
-                levelRows.add("     R ");
-                levelRows.add("  B    ");
-                levelRows.add("    R  ");
-                levelRows.add("   T   ");
-                levelRows.add("     B ");
-                break;
-
-            case 3: // Medium: More obstacles and baskets, 8x8
-                levelRows.add("E B    ");
-                levelRows.add("  T  T ");
-                levelRows.add("   M   ");
-                levelRows.add("  R    ");
-                levelRows.add("    B  ");
-                levelRows.add("   T   ");
-                levelRows.add("  B R  ");
-                levelRows.add("       ");
-                break;
-
-            case 4: // Increasing difficulty: 9x9
-                levelRows.add("E  B   ");
-                levelRows.add("  T T  ");
-                levelRows.add("    M  ");
-                levelRows.add("  R    ");
-                levelRows.add("   B   ");
-                levelRows.add("    T  ");
-                levelRows.add("  M R  ");
-                levelRows.add("   B   ");
-                levelRows.add("     R ");
-                break;
-
-            case 5: // Hard: 9x9 with more baskets and rangers
-                levelRows.add("E  B   ");
-                levelRows.add("  T T  ");
-                levelRows.add(" B M R ");
-                levelRows.add("    R  ");
-                levelRows.add("  B    ");
-                levelRows.add("    M  ");
-                levelRows.add("   T   ");
-                levelRows.add(" B  R  ");
-                levelRows.add("  T    ");
-                break;
-
-            case 6: // Even harder: 10x10
-                levelRows.add("E   T   ");
-                levelRows.add("  B R B ");
-                levelRows.add("   T M  ");
+            case 1:
+                levelRows.add("E M B R ");
+                levelRows.add("   T    ");
                 levelRows.add("    R   ");
                 levelRows.add("  B     ");
-                levelRows.add("   M R  ");
-                levelRows.add("  T B   ");
-                levelRows.add(" B  R   ");
-                levelRows.add("  M     ");
-                levelRows.add("     T  ");
+                levelRows.add("        ");
                 break;
 
-            case 7: // Challenging: 10x10
-                levelRows.add("E T R   ");
-                levelRows.add("  B T   ");
-                levelRows.add("   M    ");
-                levelRows.add("  R B   ");
-                levelRows.add("    T   ");
-                levelRows.add("   M B  ");
-                levelRows.add(" T  R   ");
-                levelRows.add("  M     ");
-                levelRows.add("   T R  ");
-                levelRows.add(" B      ");
+            case 2:
+                levelRows.add("E R    B ");
+                levelRows.add("   T  T  ");
+                levelRows.add(" R   B R ");
+                levelRows.add("  B      ");
+                levelRows.add("     T   ");
                 break;
 
-            case 8: // Dense obstacles: 10x10
-                levelRows.add("E R T B ");
-                levelRows.add("  T M   ");
-                levelRows.add("  R B   ");
-                levelRows.add(" M      ");
-                levelRows.add("   T    ");
-                levelRows.add("  R T   ");
-                levelRows.add("   B M  ");
-                levelRows.add("  T R   ");
-                levelRows.add(" B      ");
-                levelRows.add("   T    ");
+            case 3:
+                levelRows.add("E R B     ");
+                levelRows.add("   T   T  ");
+                levelRows.add(" R  M     ");
+                levelRows.add(" R  B  B  ");
+                levelRows.add("   T      ");
+                levelRows.add("      R   ");
                 break;
 
-            case 9: // Maximum difficulty: 10x10
-                levelRows.add("E T R T ");
-                levelRows.add(" T M B  ");
-                levelRows.add(" B M R  ");
-                levelRows.add("   R T  ");
-                levelRows.add(" B M    ");
-                levelRows.add(" R T    ");
-                levelRows.add("  M B   ");
-                levelRows.add(" T  R   ");
-                levelRows.add("   T M  ");
-                levelRows.add(" B      ");
+            case 4:
+                levelRows.add("E   B   T   ");
+                levelRows.add("  T  B  T   ");
+                levelRows.add("   R   M    ");
+                levelRows.add("   R    M B ");
+                levelRows.add("  R  T      ");
+                levelRows.add("   M        ");
                 break;
 
-            case 10: // Insane level: 10x10 with maximum density
-                levelRows.add("E T R T ");
-                levelRows.add(" T M B R");
-                levelRows.add(" B M R  ");
-                levelRows.add(" R T B  ");
-                levelRows.add(" B M T  ");
-                levelRows.add(" T R B  ");
-                levelRows.add(" M B T  ");
-                levelRows.add(" T R M  ");
-                levelRows.add(" R B M  ");
-                levelRows.add(" M T    ");
+            case 5:
+                levelRows.add("E  B    T   ");
+                levelRows.add("  T   M     ");
+                levelRows.add("  B   R     ");
+                levelRows.add("   T      B ");
+                levelRows.add("    R   T   ");
+                levelRows.add(" B      M   ");
+                levelRows.add("   T B   R  ");
+                break;
+
+            case 6:
+                levelRows.add("E     T      ");
+                levelRows.add("  B   R      ");
+                levelRows.add("    T   M    ");
+                levelRows.add("  R   B    T ");
+                levelRows.add("   B    T    ");
+                levelRows.add(" B   M       ");
+                levelRows.add(" T M    R    ");
+                break;
+
+            case 7:
+                levelRows.add("E  T    R     ");
+                levelRows.add("    T  B      ");
+                levelRows.add("       M      ");
+                levelRows.add("  T   R   R   ");
+                levelRows.add("B    T   B    ");
+                levelRows.add("   R          ");
+                levelRows.add("       B T    ");
+                break;
+
+            case 8:
+                levelRows.add("E    T  B     ");
+                levelRows.add("   R   B  T   ");
+                levelRows.add(" R   M        ");
+                levelRows.add("  T      R    ");
+                levelRows.add("    T   M     ");
+                levelRows.add(" T R          ");
+                levelRows.add(" B     B  T   ");
+                break;
+
+            case 9:
+                levelRows.add("E  T  R       ");
+                levelRows.add("      M   T   ");
+                levelRows.add("   R       B  ");
+                levelRows.add("     T        ");
+                levelRows.add("   B  R   M   ");
+                levelRows.add(" T     R   B  ");
+                levelRows.add(" R   B   T  B ");
+                break;
+
+            case 10:
+                levelRows.add("E   T R       ");
+                levelRows.add("R  M       T  ");
+                levelRows.add(" B     R   B  ");
+                levelRows.add(" R   M   T    ");
+                levelRows.add("   R       B  ");
+                levelRows.add("  M   T    B  ");
+                levelRows.add("  B       R   ");
                 break;
 
             default:
@@ -131,7 +116,12 @@ public class Levels {
         return levelRows;
     }
 
+    /**
+     * Returns the total number of levels.
+     *
+     * @return Total levels count.
+     */
     public static int getTotalLevels() {
-        return 10; // Updated total levels.
+        return 10;
     }
 }
