@@ -25,9 +25,9 @@ public class Levels {
                 break;
 
             case 2:
-                levelRows.add("E R    B ");
+                levelRows.add("E      B ");
                 levelRows.add("   T  T  ");
-                levelRows.add(" R   B R ");
+                levelRows.add(" R   B   ");
                 levelRows.add("  B      ");
                 levelRows.add("     T   ");
                 break;
@@ -35,7 +35,7 @@ public class Levels {
             case 3:
                 levelRows.add("E R B     ");
                 levelRows.add("   T   T  ");
-                levelRows.add(" R  M     ");
+                levelRows.add("    M     ");
                 levelRows.add(" R  B  B  ");
                 levelRows.add("   T      ");
                 levelRows.add("      R   ");
@@ -45,7 +45,7 @@ public class Levels {
                 levelRows.add("E   B   T   ");
                 levelRows.add("  T  B  T   ");
                 levelRows.add("   R   M    ");
-                levelRows.add("   R    M B ");
+                levelRows.add("        M B ");
                 levelRows.add("  R  T      ");
                 levelRows.add("   M        ");
                 break;

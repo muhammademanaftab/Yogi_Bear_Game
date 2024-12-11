@@ -6,10 +6,10 @@ import java.net.URL;
 import javax.imageio.ImageIO;
 
 public class ResourceLoader {
-    public static Image loadImage(String resName) throws IOException {
-        URL url = ResourceLoader.class.getClassLoader().getResource(resName);
+    public static Image loadImage(String resourceName) throws IOException {
+        URL url = ResourceLoader.class.getClassLoader().getResource(resourceName);
         if (url == null) {
-            throw new IOException("Resource not found: " + resName);
+            throw new IOException("Resource not found: " + resourceName);
         }
         return ImageIO.read(url);
     }

@@ -2,7 +2,7 @@ package model;
 
 /**
  * Represents the directions in which movement is allowed.
- * Each direction is associated with x and y offsets.
+ * Each direction is associated with x and y offsets. 
  */
 public enum Direction {
     UP(0, -1), 
@@ -14,7 +14,7 @@ public enum Direction {
     public final int y;
 
     /**
-     * Constructs a Direction with the specified x and y offsets.
+     * Constructing a Direction with the specified x and y offsets.
      *
      * @param x The horizontal offset for the direction.
      * @param y The vertical offset for the direction.

@@ -9,11 +9,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
 import javax.swing.*;
-import model.Direction;
-import model.Game;
-import model.GameUtils;
-import model.Levels;
-import model.Position;
+import model.*;
 
 /**
  * Main game window for the Yogi Bear Game.
@@ -149,8 +145,8 @@ public class MainWindow extends JFrame {
                 - Rangers: Moves around; Yogi loses a life if caught.
                 
                 Visuals:
-                - Baskets: Collect them to score points.
-                - Yogi: Represents the player.
+                - Baskets: Collect them to  score points.
+                - Yogi: Represents the player...
                 - Entrance: Start position.
                 
                 Rules:

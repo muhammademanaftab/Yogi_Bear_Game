@@ -102,7 +102,7 @@ public class Board extends JPanel {
                     }
                 }
 
-                gr.setColor(Color.BLACK);
+//                gr.setColor(Color.BLACK);
                 gr.drawRect(x * tileSize, y * tileSize, tileSize, tileSize);
             }
         }
